@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -24,14 +25,16 @@ namespace TriPeaksSolitaire.Core
                 LogError("Card is null, Can not add");
             }
             cardsPile.Push(card);
+            UpdateTopCardFacing();
+            OnPileUpdated?.Invoke();
         }
 
         public void Remove(Card card)
         {
-            if (!IsEmpty())
-            {
-                cardsPile.Pop();
-            }
+            if (IsEmpty()) return;
+            cardsPile.Pop();
+            UpdateTopCardFacing();
+            OnPileUpdated?.Invoke();
         }
 
         public bool Contains(Card card)
@@ -49,10 +52,21 @@ namespace TriPeaksSolitaire.Core
             return !IsEmpty() ? cardsPile.Peek() : null;
         }
 
+        void UpdateTopCardFacing()
+        {
+            var topCard = TopCard();
+            if (!topCard) return;
+            topCard.SetFaceUp();
+            topCard.IsSelectable = false;
+        }
+
         public void Clear()
         {
             cardsPile.Clear();
+            OnPileUpdated?.Invoke();
         }
+
+        public event Action OnPileUpdated;
 
         void LogError(string message)
         {

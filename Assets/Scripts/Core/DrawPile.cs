@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -18,6 +19,7 @@ namespace TriPeaksSolitaire.Core
                 LogError("Card is null, Can not add");
             }
             cardsPile.Push(card);
+            OnPileUpdated?.Invoke();
         }
 
         public void Remove(Card card)
@@ -38,11 +40,18 @@ namespace TriPeaksSolitaire.Core
         public void Clear()
         {
             cardsPile.Clear();
+            OnPileUpdated?.Invoke();
         }
+
+        public event Action OnPileUpdated;
 
         public Card DrawCard()
         {
-            return !IsEmpty() ? cardsPile.Pop() : null;
+            if (IsEmpty()) return null;
+            var card = cardsPile.Pop();
+            OnPileUpdated?.Invoke();
+            return card;
+
         }
 
         public void PopulateCards(IEnumerable<Card> cards)

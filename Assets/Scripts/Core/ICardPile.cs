@@ -1,3 +1,6 @@
+using System;
+using UnityEngine;
+
 namespace TriPeaksSolitaire.Core
 {
     public interface ICardPile
@@ -7,6 +10,8 @@ namespace TriPeaksSolitaire.Core
         bool Contains(Card card);
         bool IsEmpty();
         void Clear();
+        event Action OnPileUpdated;
         
+
     }
 }

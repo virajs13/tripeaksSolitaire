@@ -1,3 +1,4 @@
+using System;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,6 +9,7 @@ namespace TriPeaksSolitaire.Core
     public interface ICard
     {
         CardInfo CardInfo { get; }
+        bool IsSelectable { get; set; }
         void SetCardInfo(CardInfo cardInfo);
         bool IsFaceUp { get; }
         void SetFaceUp();
@@ -21,6 +23,8 @@ namespace TriPeaksSolitaire.Core
 
         public CardInfo CardInfo => cardInfo;
 
+        public bool IsSelectable { get; set; } = true;
+
         public bool IsFaceUp => isFaceUp;
         
         private Vector3 flipRotation = new Vector3(0f, 180f, 0f);
@@ -31,6 +35,9 @@ namespace TriPeaksSolitaire.Core
         [SerializeField] private float moveDuration = 1f;
 
         private Sequence flipSequence;
+
+        public Action<ICard> OnSelected;
+
         public void SetCardInfo(CardInfo cardInfo)
         {
             this.cardInfo = cardInfo;
@@ -94,6 +101,19 @@ namespace TriPeaksSolitaire.Core
             transform.DOMove(targetPosition, moveDuration);
         }
 
+        //Assigned to UI event
+        public void OnCardClick()
+        {
+            if(!IsSelectable) return;
+            Log("Selected");
+            OnSelected?.Invoke(this);
+        }
+
+        
+        void Log(string message)
+        {
+            Debug.Log($"[CARD][{cardInfo}]: {message}");
+        }
 
 #region For testing
 

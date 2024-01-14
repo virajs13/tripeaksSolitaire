@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using TriPeaksSolitaire.Utils;
+using UnityEngine;
 
 namespace TriPeaksSolitaire.Core
 {
@@ -12,7 +13,7 @@ namespace TriPeaksSolitaire.Core
 
     public class Deck : IDeck
     {
-        private const int NUM_CARDS = 52;
+        public const int NUM_CARDS = 52;
         private Card[] cards = new Card[NUM_CARDS];
         private ObjectPool<Card> cardPool;
 
@@ -57,6 +58,11 @@ namespace TriPeaksSolitaire.Core
             {
                 yield return cards[i];
             }
+        }
+        
+        void LogError(string message)
+        {
+            Debug.LogError($"[DECK]: {message}");
         }
         
         

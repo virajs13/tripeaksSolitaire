@@ -14,6 +14,8 @@ namespace TriPeaksSolitaire.Core
     {
         const int NUM_ROWS = 4;
         const int NUM_COLUMNS = 10;
+
+        public const int NUM_BOARD_CARDS = 28;
         
         //card layout will be represented by 2D array of slots
         //true - valid slot 
@@ -56,12 +58,14 @@ namespace TriPeaksSolitaire.Core
                 Add(card);
                 //set slot as invalid
                 SetCardSlot(index, false);
+                //mark card as selectable
+                card.IsSelectable = true;
 
             }
             else
             {
                 card.SetFaceDown();
-                
+                card.IsSelectable = false;
             }
             
         }
@@ -163,6 +167,7 @@ namespace TriPeaksSolitaire.Core
             }
 
             activeCardsPile[card] = cardsPile[card];
+            OnPileUpdated?.Invoke();
             
         }
 
@@ -173,6 +178,7 @@ namespace TriPeaksSolitaire.Core
             if (activeCardsPile.ContainsKey(card))
             {
                 activeCardsPile.Remove(card);
+                OnPileUpdated?.Invoke();
             }
             
         }
@@ -194,9 +200,12 @@ namespace TriPeaksSolitaire.Core
             Array.Clear(cardSlotLayout,0,cardSlotLayout.Length);
             cardsPile.Clear();
             activeCardsPile.Clear();
+            OnPileUpdated?.Invoke();
             
         }
-        
+
+        public event Action OnPileUpdated;
+
 
         void LogError(string message)
         {
