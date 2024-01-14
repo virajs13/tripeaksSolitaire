@@ -10,10 +10,10 @@ namespace TriPeaksSolitaire.Utils
         private readonly Transform parentTransform;
         private readonly List<T> objectPool = new List<T>();
 
-        public ObjectPool(T prefab, int initialSize)
+        public ObjectPool(T prefab, int initialSize, Transform parentTransform)
         {
             this.prefab = prefab;
-            this.parentTransform = CreateParentTransform(prefab);
+            this.parentTransform = parentTransform;
 
             for (int i = 0; i < initialSize; i++)
             {

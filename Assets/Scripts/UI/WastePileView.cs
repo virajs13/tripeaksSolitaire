@@ -11,9 +11,9 @@ namespace TriPeaksSolitaire.UI
         private IWastePile wastePile;
         public ICardPile CardPile => wastePile;
 
-        private void Start()
+        private void Awake()
         {
-            pilePosition = transform.position;
+            pilePosition = GetComponent<RectTransform>().position;
         }
 
         public void Initialise()
@@ -25,7 +25,11 @@ namespace TriPeaksSolitaire.UI
         private void SetTopCard()
         {
             var topCard = wastePile.TopCard();
-            topCard.MoveTo(pilePosition);
+            if (topCard)
+            {
+                topCard.transform.SetAsLastSibling();
+                topCard.MoveTo(pilePosition);
+            }
         }
         
         public void LayOutCards(IEnumerable<Card> cards)

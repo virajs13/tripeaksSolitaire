@@ -17,9 +17,9 @@ namespace TriPeaksSolitaire.Core
         private Card[] cards = new Card[NUM_CARDS];
         private ObjectPool<Card> cardPool;
 
-        public Deck(Card cardPrefab)
+        public Deck(Card cardPrefab, Transform deckHolder)
         {
-            cardPool = new ObjectPool<Card>(cardPrefab, NUM_CARDS);
+            cardPool = new ObjectPool<Card>(cardPrefab, NUM_CARDS,deckHolder);
             InitializeDeck();
         }
 

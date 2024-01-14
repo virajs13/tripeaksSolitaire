@@ -9,6 +9,7 @@ namespace TriPeaksSolitaire.Core
     public interface IBoardPile : ICardPile
     {
         void LayoutCards(IEnumerable<Card> cardsForBoard);
+        void UpdateLayoutPositions(Vector2 viewPosition, Vector2 offset);
     }
     public class BoardPile: IBoardPile
     {
@@ -29,12 +30,31 @@ namespace TriPeaksSolitaire.Core
         //all active cards (Face Up)
         private Dictionary<Card,CardSlotIndex> activeCardsPile = new Dictionary<Card, CardSlotIndex>();
         
+        
         public void LayoutCards(IEnumerable<Card> cardsForBoard)
         {
             Clear();
             SetupCardSlotLayout();
             AssignCardsToCardSlots(cardsForBoard);
             UpdateCardFacings();
+        }
+
+        public void UpdateLayoutPositions(Vector2 viewPosition, Vector2 offset)
+        {
+            foreach (var cardSlot in cardsPile)
+            {
+               cardSlot.Key.MoveInstant(GetCardPosition(cardSlot.Value,viewPosition,offset));
+               cardSlot.Key.transform.SetAsLastSibling();
+            }
+        }
+
+
+        Vector2 GetCardPosition(CardSlotIndex index,Vector2 viewPosition, Vector2 offset)
+        {
+            var x = viewPosition.x + (index.y - (3 + 0.5f * index.x)) * offset.x;
+            var y = viewPosition.y - (index.x * offset.y);
+
+            return new Vector2(x, y);
         }
 
         private void UpdateCardFacings()
@@ -51,7 +71,16 @@ namespace TriPeaksSolitaire.Core
                 return;
 
             var index = cardsPile[card];
-            if (cardSlotLayout[index.x, index.y - 1] == false && cardSlotLayout[index.x + 1, index.y - 1] == false)
+            var indexDown = new CardSlotIndex(index.x, index.y - 1);
+            var indexDownRight = new CardSlotIndex(index.x+1, index.y - 1);
+
+            if (!IsIndexInRange(indexDown) || !IsIndexInRange(indexDownRight) )
+            {
+                LogError($"cardslot index is at edge not in range");
+                return;
+            }
+            
+            if (cardSlotLayout[indexDown.x, indexDown.y] == false && cardSlotLayout[indexDownRight.x, indexDownRight.y] == false)
             {
                 card.SetFaceUp();
                 //add to active cards
@@ -200,7 +229,6 @@ namespace TriPeaksSolitaire.Core
             Array.Clear(cardSlotLayout,0,cardSlotLayout.Length);
             cardsPile.Clear();
             activeCardsPile.Clear();
-            OnPileUpdated?.Invoke();
             
         }
 

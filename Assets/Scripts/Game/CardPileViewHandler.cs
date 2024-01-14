@@ -17,17 +17,40 @@ namespace TriPeaksSolitaire.Game
             this.boardPileView = boardPileView;
             this.drawPileView = drawPileView;
             this.wastePileView = wastePileView;
+            this.boardPileView.Initialise();
+            this.drawPileView.Initialise();
+            this.wastePileView.Initialise();
         }
 
         public void LayOutCardPiles(IEnumerable<Card> cards)
         {
             ResetCardPiles();
+            LayoutDrawPile(cards.Skip(BoardPile.NUM_BOARD_CARDS)); 
+            MoveCard(GetNextDrawCard(),drawPileView,wastePileView);
             LayoutBoardPile(cards.Take(BoardPile.NUM_BOARD_CARDS));
-            LayoutDrawPile(cards.Skip(BoardPile.NUM_BOARD_CARDS));
-
-
+           
+          
+            
+            
         }
 
+        public bool IsBoardPileClear()
+        {
+            return boardPileView.CardPile.IsEmpty();
+        }
+
+        // Returns the card on top of the draw pile
+        private Card GetNextDrawCard()
+        {
+            if (drawPileView.CardPile.IsEmpty())
+            {
+                LogError("No cards in draw pile");
+                return null;
+            }
+
+            return ((IDrawPile)drawPileView.CardPile).TopCard();
+
+        }
         private void LayoutDrawPile(IEnumerable<Card> drawCards)
         {
             drawPileView.LayOutCards(drawCards);
@@ -64,7 +87,6 @@ namespace TriPeaksSolitaire.Game
             }
             
             sourcePile.CardPile.Remove(card);
-            //
             targetPile.CardPile.Add(card);
         }
         

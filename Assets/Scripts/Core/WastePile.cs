@@ -24,6 +24,7 @@ namespace TriPeaksSolitaire.Core
             {
                 LogError("Card is null, Can not add");
             }
+            
             cardsPile.Push(card);
             UpdateTopCardFacing();
             OnPileUpdated?.Invoke();

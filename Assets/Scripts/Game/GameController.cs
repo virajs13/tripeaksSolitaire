@@ -12,10 +12,15 @@ namespace TriPeaksSolitaire.Game
         [SerializeField] private BoardPileView boardPileView;
         [SerializeField] private DrawPileView drawPileView;
         [SerializeField] private WastePileView wastePileView;
-        
+        [SerializeField] private Transform deckHolder;
         private IDeck deck;
         
         private CardPileViewHandler cardPileViewHandler;
+
+        private void Start()
+        {
+            Initialise();
+        }
 
         private void Initialise()
         {
@@ -25,6 +30,7 @@ namespace TriPeaksSolitaire.Game
 
         private void SetupCardPiles()
         {
+            
             cardPileViewHandler = new CardPileViewHandler(boardPileView,drawPileView,wastePileView);
             //shuffle deck
             deck.Shuffle();
@@ -35,7 +41,7 @@ namespace TriPeaksSolitaire.Game
 
         private void SetupDeck()
         {
-            deck = new Deck(cardPrefab);
+            deck = new Deck(cardPrefab,deckHolder);
         }
 
         public void NewGame()
@@ -50,7 +56,16 @@ namespace TriPeaksSolitaire.Game
 
         public void CardClicked(Card card)
         {
-            throw new System.NotImplementedException();
+            if (card == null)
+            {
+                LogError("card is null");
+                return;
+            }
+        }
+        
+        void LogError(string message)
+        {
+            Debug.LogError($"[GAME CONTROLLER]: {message}");
         }
     }
 }

@@ -34,9 +34,17 @@ namespace TriPeaksSolitaire.Core
         [SerializeField] private float flipDuration = 1f;
         [SerializeField] private float moveDuration = 1f;
 
-        private Sequence flipSequence;
+        private Sequence flipUpSequence,flipDownSequence;
 
         public Action<ICard> OnSelected;
+
+        private RectTransform rectTransform;
+
+        private void Awake()
+        {
+            rectTransform = GetComponent<RectTransform>();
+            isFaceUp = false;
+        }
 
         public void SetCardInfo(CardInfo cardInfo)
         {
@@ -60,47 +68,47 @@ namespace TriPeaksSolitaire.Core
         [ContextMenu("Set face up")]
         public void SetFaceUp()
         {
-            flipSequence = DOTween.Sequence();
-            flipSequence.Append(transform.DORotate(flipRotation / 2f, flipDuration / 2f).SetRelative().OnComplete(() =>
+            flipUpSequence = DOTween.Sequence();
+            flipUpSequence.Append(transform.DORotate(flipRotation / 2f, flipDuration / 2f).SetRelative().OnComplete(() =>
             {
                 cardBack.SetActive(false);
             }));
-            flipSequence.Append(transform.DORotate(flipRotation / 2f, flipDuration / 2f).SetRelative().OnComplete(() =>
-            {
-                isFaceUp = true;
-            }));
+            flipUpSequence.Append(transform.DORotate(flipRotation / 2f, flipDuration / 2f).SetRelative());
             
             if (!isFaceUp)
             {
 
-                flipSequence.Play();
+                flipUpSequence.Play();
             }
+            isFaceUp = true;
             
         }
 
         [ContextMenu("Set face down")]
         public void SetFaceDown()
         {
-            flipSequence = DOTween.Sequence();
-            flipSequence.Append(transform.DORotate(flipRotation / 2f, flipDuration / 2f).SetRelative().OnComplete(() =>
+            flipDownSequence = DOTween.Sequence();
+            flipDownSequence.Append(transform.DORotate(flipRotation / 2f, flipDuration / 2f).SetRelative().OnComplete(() =>
             {
                 cardBack.SetActive(true);
             }));
-            flipSequence.Append(transform.DORotate(flipRotation / 2f, flipDuration / 2f).SetRelative().OnComplete(() =>
-            {
-                isFaceUp = false;
-            }));
+            flipDownSequence.Append(transform.DORotate(flipRotation / 2f, flipDuration / 2f).SetRelative());
             if (isFaceUp)
             {
-                flipSequence.Play();
+                flipDownSequence.Play();
             }
+            isFaceUp = false;
         }
 
         public void MoveTo(Vector2 targetPosition)
         {
-            transform.DOMove(targetPosition, moveDuration);
+            rectTransform.DOMove(targetPosition, moveDuration);
         }
 
+        public void MoveInstant(Vector2 targetPosition)
+        {
+            rectTransform.position = targetPosition;
+        }
         //Assigned to UI event
         public void OnCardClick()
         {
