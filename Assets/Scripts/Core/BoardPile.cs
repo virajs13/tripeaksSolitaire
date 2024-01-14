@@ -174,10 +174,10 @@ namespace TriPeaksSolitaire.Core
             else
             {
                 // card.SetFaceDown();
-                // if (activeCards.Contains(card))
-                // {
-                //     activeCards.Remove(card);
-                // }
+                if (activeCards.Contains(card))
+                {
+                    activeCards.Remove(card);
+                }
                 // card.IsSelectable = false;
             }
 
@@ -211,6 +211,10 @@ namespace TriPeaksSolitaire.Core
                 if (card == cardsPile[index.x, index.y])
                 {
                     SetCard(null, index.x, index.y);
+                    if (activeCards.Contains(card))
+                    {
+                        activeCards.Remove(card);
+                    }
                     return;
                 }
             }

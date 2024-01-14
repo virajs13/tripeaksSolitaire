@@ -16,7 +16,8 @@ namespace TriPeaksSolitaire.UI
         }
         public void Initialise()
         {
-            drawPile = new DrawPile(pilePosition,offset);
+            var canvasScaleFactor = GetComponentInParent<Canvas>().scaleFactor;
+            drawPile = new DrawPile(pilePosition,offset*canvasScaleFactor);
             
         }
 

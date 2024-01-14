@@ -703,7 +703,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b201b6613af0436dbd25a4f18a49843e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  offset: {x: 80, y: 40}
+  offset: {x: 150, y: 80}
 --- !u!114 &535026900
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1815,7 +1815,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e944074eb55c4bf0950feb8c9af2cb8f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  offset: {x: 10, y: 0}
+  offset: {x: 15, y: 0}
 --- !u!114 &1003309494
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2070,7 +2070,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -55.00006}
+  m_AnchoredPosition: {x: 0, y: -55.000122}
   m_SizeDelta: {x: 0, y: -110}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1163351614

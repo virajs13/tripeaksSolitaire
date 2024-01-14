@@ -17,7 +17,8 @@ namespace TriPeaksSolitaire.UI
         }
         public void Initialise()
         {
-            boardPile = new BoardPile(pilePosition,offset);
+            var canvasScaleFactor = GetComponentInParent<Canvas>().scaleFactor;
+            boardPile = new BoardPile(pilePosition,offset*canvasScaleFactor);
         }
 
         public ICardPile CardPile => boardPile;
