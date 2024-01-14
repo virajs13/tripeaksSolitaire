@@ -31,6 +31,7 @@ namespace TriPeaksSolitaire.Core
             }
             card.MoveInstant(GetNextPosition());
             card.transform.SetAsLastSibling();
+            card.IsSelectable = true;
             cardsPile.Push(card);
             OnPileUpdated?.Invoke();
         }

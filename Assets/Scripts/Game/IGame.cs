@@ -7,5 +7,7 @@ namespace TriPeaksSolitaire.Game
         void NewGame();
         void BuyDeck();
         void CardClicked(Card card);
+        bool IsValidMove(Card cardA, Card cardB);
+
     }
 }

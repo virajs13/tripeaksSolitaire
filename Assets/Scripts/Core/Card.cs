@@ -33,10 +33,10 @@ namespace TriPeaksSolitaire.Core
         [SerializeField] private GameObject cardBack;
         [SerializeField] private float flipDuration = 1f;
         [SerializeField] private float moveDuration = 1f;
-
+        [SerializeField] private GameObject content;
         private Sequence flipUpSequence,flipDownSequence;
 
-        public Action<ICard> OnSelected;
+        public Action<Card> OnSelected;
 
         private RectTransform rectTransform;
 
@@ -69,18 +69,22 @@ namespace TriPeaksSolitaire.Core
         public void SetFaceUp()
         {
             flipUpSequence = DOTween.Sequence();
-            flipUpSequence.Append(transform.DORotate(flipRotation / 2f, flipDuration / 2f).SetRelative().OnComplete(() =>
+            flipUpSequence.Append(content.transform.DORotate(flipRotation / 2f, flipDuration / 2f).From(Vector3.zero).OnComplete(() =>
             {
                 cardBack.SetActive(false);
             }));
-            flipUpSequence.Append(transform.DORotate(flipRotation / 2f, flipDuration / 2f).SetRelative());
+            flipUpSequence.Append(content.transform.DORotate(flipRotation, flipDuration / 2f).From(flipRotation / 2f));
+            flipUpSequence.OnComplete((() =>
+            {
+                isFaceUp = true;
+            }));
             
             if (!isFaceUp)
             {
 
                 flipUpSequence.Play();
             }
-            isFaceUp = true;
+         
             
         }
 
@@ -88,16 +92,20 @@ namespace TriPeaksSolitaire.Core
         public void SetFaceDown()
         {
             flipDownSequence = DOTween.Sequence();
-            flipDownSequence.Append(transform.DORotate(flipRotation / 2f, flipDuration / 2f).SetRelative().OnComplete(() =>
+            flipDownSequence.Append(content.transform.DORotate(flipRotation / 2f, flipDuration / 2f).From(flipRotation).OnComplete(() =>
             {
                 cardBack.SetActive(true);
             }));
-            flipDownSequence.Append(transform.DORotate(flipRotation / 2f, flipDuration / 2f).SetRelative());
+            flipDownSequence.Append(content.transform.DORotate(Vector3.zero, flipDuration / 2f).From(flipRotation / 2f));
+            flipDownSequence.OnComplete((() =>
+            {
+                isFaceUp = false;
+            }));
             if (isFaceUp)
             {
                 flipDownSequence.Play();
             }
-            isFaceUp = false;
+         
         }
 
         public void MoveTo(Vector2 targetPosition)

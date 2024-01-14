@@ -6,14 +6,16 @@ using UnityEngine;
 
 namespace TriPeaksSolitaire.Game
 {
-    public class CardPileViewHandler
+    public class CardPileViewHandler: ICardPileActions
     {
         private ICardPileView boardPileView;
         private ICardPileView drawPileView;
         private ICardPileView wastePileView;
+        private IGame game;
         
-        public CardPileViewHandler(ICardPileView boardPileView, ICardPileView drawPileView, ICardPileView wastePileView)
+        public CardPileViewHandler(IGame game,ICardPileView boardPileView, ICardPileView drawPileView, ICardPileView wastePileView)
         {
+            this.game = game;
             this.boardPileView = boardPileView;
             this.drawPileView = drawPileView;
             this.wastePileView = wastePileView;
@@ -25,13 +27,48 @@ namespace TriPeaksSolitaire.Game
         public void LayOutCardPiles(IEnumerable<Card> cards)
         {
             ResetCardPiles();
-            LayoutDrawPile(cards.Skip(BoardPile.NUM_BOARD_CARDS)); 
-            MoveCard(GetNextDrawCard(),drawPileView,wastePileView);
+            LayoutDrawPile(cards.Skip(BoardPile.NUM_BOARD_CARDS));
+            DrawCard();
             LayoutBoardPile(cards.Take(BoardPile.NUM_BOARD_CARDS));
            
           
             
             
+        }
+
+        public void PerformValidMove(Card card)
+        {
+            //move card from board pile to waste pile
+            MoveCard(card,boardPileView,wastePileView);
+        }
+
+        public void DrawCard()
+        {
+            //move card from draw pile to waste pile
+            MoveCard(GetNextDrawCard(),drawPileView,wastePileView);
+        }
+
+        public void HandleCardClick(Card card)
+        {
+            if (IsValidBoardPileMove(card))
+            {
+                PerformValidMove(card);
+            }
+            else if(IsDrawPileClick(card))
+            {
+                DrawCard();
+            }
+        }
+
+        private bool IsValidBoardPileMove(Card card)
+        {
+            var wastePileTopCard = ((IWastePile)(wastePileView.CardPile)).TopCard();
+            return card.IsFaceUp && boardPileView.CardPile.Contains(card) && game.IsValidMove(card,wastePileTopCard);
+        }
+
+        private bool IsDrawPileClick(Card card)
+        {
+            return ((IDrawPile)drawPileView.CardPile).Contains(card);
         }
 
         public bool IsBoardPileClear()
@@ -51,6 +88,8 @@ namespace TriPeaksSolitaire.Game
             return ((IDrawPile)drawPileView.CardPile).TopCard();
 
         }
+        
+        
         private void LayoutDrawPile(IEnumerable<Card> drawCards)
         {
             drawPileView.LayOutCards(drawCards);
@@ -68,7 +107,7 @@ namespace TriPeaksSolitaire.Game
             wastePileView.CardPile.Clear();
         }
 
-        void MoveCard(Card card, ICardPileView sourcePile,ICardPileView targetPile)
+        public void MoveCard(Card card, ICardPileView sourcePile,ICardPileView targetPile)
         {
             if (card == null)
             {

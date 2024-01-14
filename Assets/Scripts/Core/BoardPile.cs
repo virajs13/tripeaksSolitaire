@@ -122,6 +122,7 @@ namespace TriPeaksSolitaire.Core
 
         private void UpdateCardFacings()
         {
+            Log("Updating card facings");
             foreach (CardIndex index in GetCardIndices())
             {
                 UpdateCardFacing(index.x, index.y);
@@ -138,6 +139,7 @@ namespace TriPeaksSolitaire.Core
             var card = cardsPile[x, y];
             if (card == null)
                 return;
+           
             if (y +1 > cardsPile.GetLength(1) || x + 1 > cardsPile.GetLength(0))
             {
                 return;
@@ -145,22 +147,24 @@ namespace TriPeaksSolitaire.Core
             
             if (cardsPile[x+1, y] == null && cardsPile[x + 1, y + 1] == null)
             {
-                card.SetFaceUp();
+               
                 if (!activeCards.Contains(card))
                 {
                     activeCards.Add(card);
+                    card.SetFaceUp();
+                    card.IsSelectable = true;
                 }
 
-                card.IsSelectable = true;
+               
             }
             else
             {
-                card.SetFaceDown();
-                if (activeCards.Contains(card))
-                {
-                    activeCards.Remove(card);
-                }
-                card.IsSelectable = false;
+                // card.SetFaceDown();
+                // if (activeCards.Contains(card))
+                // {
+                //     activeCards.Remove(card);
+                // }
+                // card.IsSelectable = false;
             }
 
         }
@@ -226,6 +230,10 @@ namespace TriPeaksSolitaire.Core
         void LogError(string message)
         {
             Debug.LogError($"[BOARD PILE]: {message}");
+        }
+        void Log(string message)
+        {
+            Debug.Log($"[BOARD PILE]: {message}");
         }
 
 
