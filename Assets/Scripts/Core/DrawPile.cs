@@ -3,20 +3,14 @@ using UnityEngine;
 
 namespace TriPeaksSolitaire.Core
 {
-
-    public interface IWastePile : ICardPile
-    { 
-        Card TopCard();
+    public interface IDrawPile : ICardPile
+    {
+        Card DrawCard();
+        void PopulateCards(IEnumerable<Card> cards);
     }
-    public class WastePile: IWastePile
+    public class DrawPile: IDrawPile
     {
         private Stack<Card> cardsPile;
-
-        public WastePile()
-        {
-            cardsPile = new Stack<Card>();
-        }
-
         public void Add(Card card)
         {
             if (card == null)
@@ -28,10 +22,7 @@ namespace TriPeaksSolitaire.Core
 
         public void Remove(Card card)
         {
-            if (!IsEmpty())
-            {
-                cardsPile.Pop();
-            }
+            DrawCard();
         }
 
         public bool Contains(Card card)
@@ -44,19 +35,27 @@ namespace TriPeaksSolitaire.Core
             return cardsPile.Count == 0;
         }
 
-        public Card TopCard()
-        {
-            return !IsEmpty() ? cardsPile.Peek() : null;
-        }
-
         public void Clear()
         {
             cardsPile.Clear();
         }
 
+        public Card DrawCard()
+        {
+            return !IsEmpty() ? cardsPile.Pop() : null;
+        }
+
+        public void PopulateCards(IEnumerable<Card> cards)
+        {
+            foreach (var card in cards)
+            {
+                cardsPile.Push(card);
+            }
+        }
+        
         void LogError(string message)
         {
-            Debug.LogError($"[WASTE PILE]: {message}");
+            Debug.LogError($"[DRAW PILE]: {message}");
         }
     }
 }

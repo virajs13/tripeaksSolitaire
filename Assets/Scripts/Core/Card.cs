@@ -1,62 +1,109 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
-using Random = UnityEngine.Random;
+using UnityEngine.UI;
 
 namespace TriPeaksSolitaire.Core
 {
-    
-    public class Card
+
+    public interface ICard
     {
-        public enum Suit
-        {
-            HEART,
-            DIAMOND,
-            SPADES,
-            CLUB
-        }
-        private int m_value;
-        private Suit m_suit;
-        private bool m_isFaceUp;
+        CardInfo CardInfo { get; }
+        void SetCardInfo(CardInfo cardInfo);
+        bool IsFaceUp { get; }
+        void SetFaceUp();
+        void SetFaceDown();
+        void MoveTo(Vector2 targetPosition);
+    }
+    public class Card: MonoBehaviour,ICard
+    {
+        private CardInfo cardInfo;
+        private bool isFaceUp;
 
+        public CardInfo CardInfo => cardInfo;
 
-        public Card(int value, Suit suit)
-        {
-            m_value = value;
-            m_suit = suit;
-        }
-
-        public bool IsFaceUp => m_isFaceUp;
-
-        public int Value => m_value;
+        public bool IsFaceUp => isFaceUp;
         
-        public void SetFaceUp(bool isFaceUp)
-        {
-            m_isFaceUp = isFaceUp;
-        }
-        
-        public override string ToString()
-        {
-            return $"{m_value} of {m_suit}";
-        }
-        
-        public int CompareTo(Card otherCard)
-        {
-            //As per game requirement, if diff between values is 1, return 1 else 0 
-            //For special case of ACE, check value of other card 
+        private Vector3 flipRotation = new Vector3(0f, 180f, 0f);
 
-            if ((m_value == 14 && otherCard.Value is 2 or 13) ||
-                (m_value is 2 or 13 && otherCard.Value == 14) ||
-                Mathf.Abs(m_value - otherCard.Value) == 1)
+        [SerializeField] private Image faceImage;
+        [SerializeField] private GameObject cardBack;
+        [SerializeField] private float flipDuration = 1f;
+        [SerializeField] private float moveDuration = 1f;
+
+        private Sequence flipSequence;
+        public void SetCardInfo(CardInfo cardInfo)
+        {
+            this.cardInfo = cardInfo;
+            faceImage.sprite = LoadCardFaceSprite("CardSprites/"+ cardInfo.GetCardResourcePath());
+        }
+
+        private Sprite LoadCardFaceSprite(string cardFaceSpritePath)
+        {
+            
+            Sprite loadedSprite = Resources.Load<Sprite>(cardFaceSpritePath);
+
+            if (loadedSprite == null)
             {
-                return 1;
+                Debug.LogError("Sprite not found at path: " + cardFaceSpritePath);
             }
 
-            return 0;
+            return loadedSprite;
+        }
+
+        [ContextMenu("Set face up")]
+        public void SetFaceUp()
+        {
+            flipSequence = DOTween.Sequence();
+            flipSequence.Append(transform.DORotate(flipRotation / 2f, flipDuration / 2f).SetRelative().OnComplete(() =>
+            {
+                cardBack.SetActive(false);
+            }));
+            flipSequence.Append(transform.DORotate(flipRotation / 2f, flipDuration / 2f).SetRelative().OnComplete(() =>
+            {
+                isFaceUp = true;
+            }));
+            
+            if (!isFaceUp)
+            {
+
+                flipSequence.Play();
+            }
+            
+        }
+
+        [ContextMenu("Set face down")]
+        public void SetFaceDown()
+        {
+            flipSequence = DOTween.Sequence();
+            flipSequence.Append(transform.DORotate(flipRotation / 2f, flipDuration / 2f).SetRelative().OnComplete(() =>
+            {
+                cardBack.SetActive(true);
+            }));
+            flipSequence.Append(transform.DORotate(flipRotation / 2f, flipDuration / 2f).SetRelative().OnComplete(() =>
+            {
+                isFaceUp = false;
+            }));
+            if (isFaceUp)
+            {
+                flipSequence.Play();
+            }
+        }
+
+        public void MoveTo(Vector2 targetPosition)
+        {
+            transform.DOMove(targetPosition, moveDuration);
+        }
+
+
+#region For testing
+
+        [ContextMenu("Set Random Card Info")]
+        public void SetRandomCardInfo()
+        {
+            SetCardInfo(CardInfo.GetRandomCardInfo());
         }
         
-    }
-    
-}
 
+#endregion
+    }
+}

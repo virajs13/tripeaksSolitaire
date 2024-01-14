@@ -1,76 +1,65 @@
 using System;
 using System.Collections.Generic;
+using TriPeaksSolitaire.Utils;
 
 namespace TriPeaksSolitaire.Core
 {
-    public class Deck
+    public interface IDeck
     {
-        private Queue<Card> cards;
+        void Shuffle();
+        IEnumerable<Card> GetAllCards();
+    }
 
-        public Deck()
+    public class Deck : IDeck
+    {
+        private const int NUM_CARDS = 52;
+        private Card[] cards = new Card[NUM_CARDS];
+        private ObjectPool<Card> cardPool;
+
+        public Deck(Card cardPrefab)
         {
-            cards = new Queue<Card>();
+            cardPool = new ObjectPool<Card>(cardPrefab, NUM_CARDS);
             InitializeDeck();
         }
 
         private void InitializeDeck()
         {
-            // Clear any existing cards in the deck
-            cards.Clear();
-
-            // Create cards for each combination of value and suit
-            foreach (Card.Suit suit in Enum.GetValues(typeof(Card.Suit)))
-            {
-                for (var value = 2; value <= 14; value++) // 11 for Jack, 12 for Queen, 13 for King, 14 for Ace
-                {
-                    var newCard = new Card(value, suit);
-                    cards.Enqueue(newCard);
-                }
-            }
-            
-            //Shuffle Cards
+            Reset();
             
             Shuffle();
         }
 
+        void Reset()
+        {
+            foreach (var cardInfo in CardInfo.EnumerateCardInfo())
+            {
+                var card = cardPool.GetObject();
+                card.SetCardInfo(cardInfo);
+                cards[cardInfo.GetCardId()] = card;
+            }
+        }
         public void Shuffle()
         {
-            var shuffledCards = new List<Card>(cards);
-            ShuffleCards(shuffledCards);
-            cards = new Queue<Card>(shuffledCards);
-        }
-
-        public Card DealCard()
-        {
-            if (cards.Count > 0)
+            for (int i = 0; i < cards.Length; i++)
             {
-                return cards.Dequeue();
-            }
-            else
-            {
-                // Handle case when the deck is empty (perhaps reshuffle or signal no more cards).
-                return null;
+                SwapCards(i, UnityEngine.Random.Range(i, cards.Length));
             }
         }
-
-        public void ResetDeck()
+        
+        void SwapCards(int a, int b)
         {
-            // Reset the deck to its initial state.
-            InitializeDeck();
+            (cards[a], cards[b]) = (cards[b], cards[a]);
         }
-
-        // Shuffling cards
-        private void ShuffleCards(IList<Card> cardList)
+        
+        public IEnumerable<Card> GetAllCards()
         {
-            var n = cardList.Count;
-            while (n > 1)
+            for (int i = 0; i < cards.Length; i++)
             {
-                n--;
-                var k = UnityEngine.Random.Range(0, n + 1);
-                // Swap elements at indices k and n
-                (cardList[k], cardList[n]) = (cardList[n], cardList[k]);
+                yield return cards[i];
             }
         }
+        
+        
     } 
 
 }
