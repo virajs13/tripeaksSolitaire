@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace TriPeaksSolitaire.Core
@@ -9,7 +10,6 @@ namespace TriPeaksSolitaire.Core
     public interface IBoardPile : ICardPile
     {
         void LayoutCards(IEnumerable<Card> cardsForBoard);
-        void UpdateLayoutPositions(Vector2 viewPosition, Vector2 offset);
     }
     public class BoardPile: IBoardPile
     {
@@ -19,114 +19,86 @@ namespace TriPeaksSolitaire.Core
         public const int NUM_BOARD_CARDS = 28;
         
         //card layout will be represented by 2D array of slots
-        //true - valid slot 
-        //false - invalid slot
         //to update card active status (Face Up/Face down), we can check validity of slots below and below to the right
         //extra row and column for slots on edges
-        private bool[,] cardSlotLayout = new bool[NUM_ROWS+1, NUM_COLUMNS+1];
+        private Card[,] cardsPile = new Card[NUM_ROWS+1, NUM_COLUMNS+1];
         
-        //mapping of all cards to it's slot index 
-        private Dictionary<Card, CardSlotIndex> cardsPile = new Dictionary<Card, CardSlotIndex>();
-        //all active cards (Face Up)
-        private Dictionary<Card,CardSlotIndex> activeCardsPile = new Dictionary<Card, CardSlotIndex>();
-        
-        
-        public void LayoutCards(IEnumerable<Card> cardsForBoard)
+        private Dictionary<Card, Vector2> cardPositions = new Dictionary<Card, Vector2>();
+
+        private List<Card> activeCards = new List<Card>();
+
+        private Vector2 viewPosition;
+        private Vector2 offset;
+
+        public BoardPile(Vector2 viewPosition, Vector2 offset)
+        {
+            this.viewPosition = viewPosition;
+            this.offset = offset;
+        }
+        public async void LayoutCards(IEnumerable<Card> cardsForBoard)
         {
             Clear();
-            SetupCardSlotLayout();
-            AssignCardsToCardSlots(cardsForBoard);
+            SetupCards(cardsForBoard);
+            SetupCardPositions();
+            MoveCards();
             UpdateCardFacings();
         }
 
-        public void UpdateLayoutPositions(Vector2 viewPosition, Vector2 offset)
+        private void MoveCards()
         {
-            foreach (var cardSlot in cardsPile)
+            foreach (var card in EnumerateCards())
             {
-               cardSlot.Key.MoveInstant(GetCardPosition(cardSlot.Value,viewPosition,offset));
-               cardSlot.Key.transform.SetAsLastSibling();
+                Vector3 position = cardPositions[card];
+                card.transform.SetAsFirstSibling();
+                card.MoveTo(position);
             }
         }
 
-
-        Vector2 GetCardPosition(CardSlotIndex index,Vector2 viewPosition, Vector2 offset)
+        //get all non null cards
+        IEnumerable<Card> EnumerateCards()
         {
-            var x = viewPosition.x + (index.y - (3 + 0.5f * index.x)) * offset.x;
-            var y = viewPosition.y - (index.x * offset.y);
-
-            return new Vector2(x, y);
+            return GetCardIndices()
+                .Select(index => cardsPile[index.x, index.y])
+                .Where(card => card != null);
         }
 
-        private void UpdateCardFacings()
+        private void SetupCardPositions()
         {
-            foreach (var cardSlot in cardsPile)
+            foreach (CardIndex index in GetCardIndices())
             {
-                UpdateCardFacing(cardSlot.Key);
-            }
-        }
-
-        private void UpdateCardFacing(Card card)
-        {
-            if (card == null)
-                return;
-
-            var index = cardsPile[card];
-            var indexDown = new CardSlotIndex(index.x, index.y - 1);
-            var indexDownRight = new CardSlotIndex(index.x+1, index.y - 1);
-
-            if (!IsIndexInRange(indexDown) || !IsIndexInRange(indexDownRight) )
-            {
-                LogError($"cardslot index is at edge not in range");
-                return;
-            }
-            
-            if (cardSlotLayout[indexDown.x, indexDown.y] == false && cardSlotLayout[indexDownRight.x, indexDownRight.y] == false)
-            {
-                card.SetFaceUp();
-                //add to active cards
-                Add(card);
-                //set slot as invalid
-                SetCardSlot(index, false);
-                //mark card as selectable
-                card.IsSelectable = true;
-
-            }
-            else
-            {
-                card.SetFaceDown();
-                card.IsSelectable = false;
+                Card card = cardsPile[index.x, index.y];
+                cardPositions[card] = GetCardPosition(index);
             }
             
         }
-
-        //set card slot status
-        private void SetCardSlot(CardSlotIndex index, bool value)
+        private void SetupCards(IEnumerable<Card> cardsForBoard)
         {
-            if (IsIndexInRange(index))
+            var cardsIterator = cardsForBoard.GetEnumerator();
+            foreach (var index in GetCardIndices())
             {
-                cardSlotLayout[index.x, index.y] = value;
-            }
-            else
-            {
-                LogError("Out of range index: " + index);
+                cardsPile[index.x, index.y] = GetNext(cardsIterator);
             }
         }
         
-        private bool IsIndexInRange(CardSlotIndex index)
+        IEnumerable<CardIndex> GetCardIndices()
         {
-            return index.x >= 0 && index.x < cardSlotLayout.GetLength(0) &&
-                   index.y >= 0 && index.y < cardSlotLayout.GetLength(1);
-        }
-
-        private void AssignCardsToCardSlots(IEnumerable<Card> cardsForBoard)
-        {
-            var cardsIterator = cardsForBoard.GetEnumerator();
-            foreach (var cardSlotIndex in GetCardSlotIndices())
+            for (var r = NUM_ROWS; r >=0; r--)
             {
-                var card = GetNext(cardsIterator);
-                cardsPile[card] = cardSlotIndex;
+                for (var c = NUM_COLUMNS; c >=0; c--)
+                {
+                    if (IsValidSlot(r,c,NUM_COLUMNS+1))
+                    {
+                        yield return new CardIndex(r, c);
+                    }
+                }
             }
         }
+        
+        private bool IsValidSlot(int i, int j, int cols)
+        {
+            return ((((j % 3) <= i) && ((j / 3 < 3) && i < 3)) || (i % 3 == 0 && i != 0 && j < cols - 1));
+        }
+
 
         T GetNext<T>(IEnumerator<T> enumerator)
         {
@@ -137,66 +109,78 @@ namespace TriPeaksSolitaire.Core
             // Handle the case where there is no next element.
             throw new InvalidOperationException("Enumerator has no next element.");
         }
-        private void SetupCardSlotLayout()
+        
+
+
+        Vector2 GetCardPosition(CardIndex index)
         {
-            var rows = cardSlotLayout.GetLength(0);
-            var columns = cardSlotLayout.GetLength(1);
-            for (int i = 0; i < rows; i++)
+            var x = viewPosition.x + (index.y - (3 + 0.5f * index.x)) * offset.x;
+            var y = viewPosition.y - (index.x * offset.y);
+
+            return new Vector2(x, y);
+        }
+
+        private void UpdateCardFacings()
+        {
+            foreach (CardIndex index in GetCardIndices())
             {
-                for (int j = 0; j < columns; j++)
-                {
-                    if (IsValidSlot(i, j,columns))
-                    {
-                        cardSlotLayout[i, j] = true;
-                    }
-                    else
-                    {
-                        cardSlotLayout[i, j] = false;
-                    }
-                }
+                UpdateCardFacing(index.x, index.y);
             }
         }
 
-        private bool IsValidSlot(int i, int j, int cols)
+        private void UpdateCardFacing(int x, int y)
         {
-            return ((((j % 3) <= i) && ((j / 3 < 3) && i < 3)) || (i % 3 == 0 && i != 0 && j < cols - 1));
+            if (x < 0 || x >= cardsPile.GetLength(0) || y < 0 || y >= cardsPile.GetLength(1))
+            {
+                // Indices are out of bounds
+                return;
+            }
+            var card = cardsPile[x, y];
+            if (card == null)
+                return;
+            if (y +1 > cardsPile.GetLength(1) || x + 1 > cardsPile.GetLength(0))
+            {
+                return;
+            }
+            
+            if (cardsPile[x+1, y] == null && cardsPile[x + 1, y + 1] == null)
+            {
+                card.SetFaceUp();
+                if (!activeCards.Contains(card))
+                {
+                    activeCards.Add(card);
+                }
+
+                card.IsSelectable = true;
+            }
+            else
+            {
+                card.SetFaceDown();
+                if (activeCards.Contains(card))
+                {
+                    activeCards.Remove(card);
+                }
+                card.IsSelectable = false;
+            }
+
         }
 
-        IEnumerable<CardSlotIndex> GetCardSlotIndices()
+        //set card slot status
+        private void SetCard(Card card, int x, int y)
         {
-            for (var r = 0; r < NUM_ROWS; r++)
-            {
-                for (var c = 0; c < NUM_COLUMNS; c++)
-                {
-                    if (cardSlotLayout[r, c])
-                    {
-                         yield return new CardSlotIndex(r, c);
-                    }
-                }
-            }
+            cardsPile[x, y] = card;
+            UpdateCardFacings();
         }
+        
+
+       
+
+       
+       
 
        
         public void Add(Card card)
         {
-            //add card to active cards pile
-            
-            //check if it is in active card pile
-            if (activeCardsPile.ContainsKey(card))
-            {
-                LogError("Card already present in active card pile");
-                return;
-            }
-            
-            //check if card is in cards pile
-            if (!cardsPile.ContainsKey(card))
-            {
-                LogError("Card not present in cards pile");
-                return;
-            }
-
-            activeCardsPile[card] = cardsPile[card];
-            OnPileUpdated?.Invoke();
             
         }
 
@@ -204,31 +188,35 @@ namespace TriPeaksSolitaire.Core
         {
             //remove card from active cards pile 
 
-            if (activeCardsPile.ContainsKey(card))
+            foreach (CardIndex index in GetCardIndices())
             {
-                activeCardsPile.Remove(card);
-                OnPileUpdated?.Invoke();
+                if (card == cardsPile[index.x, index.y])
+                {
+                    SetCard(null, index.x, index.y);
+                    return;
+                }
             }
+            
+            LogError("Card not found");
             
         }
 
         public bool Contains(Card card)
         {
             //if card is in active cards
-            return activeCardsPile.ContainsKey(card);
+            return EnumerateCards().Any(card.Equals);
         }
 
         public bool IsEmpty()
         {
-            //if active cards is empty
-            return !activeCardsPile.Any();
+            return !EnumerateCards().Any();
         }
 
         public void Clear()
         {
-            Array.Clear(cardSlotLayout,0,cardSlotLayout.Length);
-            cardsPile.Clear();
-            activeCardsPile.Clear();
+            Array.Clear(cardsPile,0,cardsPile.Length);
+            cardPositions.Clear();
+            activeCards.Clear();
             
         }
 
@@ -241,12 +229,12 @@ namespace TriPeaksSolitaire.Core
         }
 
 
-        private struct CardSlotIndex
+        private struct CardIndex
         {
             public readonly int x, y;
             
             
-            public CardSlotIndex(int x, int y)
+            public CardIndex(int x, int y)
             {
                 this.x = x;
                 this.y = y;

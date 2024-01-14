@@ -17,7 +17,7 @@ namespace TriPeaksSolitaire.UI
         }
         public void Initialise()
         {
-            boardPile = new BoardPile();
+            boardPile = new BoardPile(pilePosition,offset);
         }
 
         public ICardPile CardPile => boardPile;
@@ -26,7 +26,6 @@ namespace TriPeaksSolitaire.UI
         {
             //update card facings and assign it to slots
             ((IBoardPile)boardPile).LayoutCards(cards);
-            ((IBoardPile)boardPile).UpdateLayoutPositions(pilePosition,offset);
             
         }
 
@@ -35,10 +34,6 @@ namespace TriPeaksSolitaire.UI
             return pilePosition;
         }
 
-        [ContextMenu("Update positions")]
-        void UpdateLayoutPositions()
-        {
-            ((IBoardPile)boardPile).UpdateLayoutPositions(pilePosition,offset);
-        }
+       
     }
 }

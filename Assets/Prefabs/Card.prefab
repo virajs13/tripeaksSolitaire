@@ -235,7 +235,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   faceImage: {fileID: 2182883327913744327}
   cardBack: {fileID: 366423840429740374}
-  flipDuration: 1
+  flipDuration: 0.5
   moveDuration: 1
 --- !u!114 &2383908227383870758
 MonoBehaviour:
