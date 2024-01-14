@@ -2,6 +2,7 @@ using System;
 using TriPeaksSolitaire.Core;
 using TriPeaksSolitaire.Game;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace TriPeaksSolitaire.UI
@@ -16,17 +17,21 @@ namespace TriPeaksSolitaire.UI
         [SerializeField] private Button newGameButton;
 
 
-        [SerializeField] private Button buyDeckButton;
-        
-        
+        [SerializeField] private Button buyDeckPopupButton;
+        [SerializeField] private Button newGamePopupButton;
+        [SerializeField] private GameObject buyDeckPopup;
+        [SerializeField] private GameObject gameWinPopup;
+
+        [SerializeField] private GameTimer gameTimer;
+        [SerializeField] private LeaderboardHandler leaderboardHandler;
         public Action OnNewGameClicked;
-        public Action OnLeaderboardClicked;
         public Action OnBuyDeckButtonClicked;
         private void Awake()
         {
             newGameButton.onClick.AddListener(NewGameButtonClick);
             leaderBoardButton.onClick.AddListener(LeaderboardButtonClick);
-            buyDeckButton?.onClick.AddListener(BuyDeckButtonClick);
+            buyDeckPopupButton.onClick.AddListener(BuyDeckButtonClick);
+            newGamePopupButton.onClick.AddListener(NewGameButtonClick);
         }
 
         private void BuyDeckButtonClick()
@@ -36,7 +41,7 @@ namespace TriPeaksSolitaire.UI
 
         private void LeaderboardButtonClick()
         {
-            OnLeaderboardClicked?.Invoke();
+            leaderboardHandler.gameObject.SetActive(true);
         }
 
         private void NewGameButtonClick()
@@ -50,11 +55,25 @@ namespace TriPeaksSolitaire.UI
             highScoreText.text = scoreBoard.HighScore.ToString();
         }
 
+        public void ShowBuyDeckPopup()
+        {
+            buyDeckPopup.SetActive(true);
+        }
+
+        public void ShowGameWinPopup()
+        {
+            gameWinPopup.SetActive(true);
+            gameTimer.StopTimer();
+        }
+
+     
+
         private void OnDisable()
         {
             newGameButton.onClick.RemoveListener(NewGameButtonClick);
             leaderBoardButton.onClick.RemoveListener(LeaderboardButtonClick);
-            buyDeckButton?.onClick.RemoveListener(BuyDeckButtonClick);
+            buyDeckPopupButton.onClick.RemoveListener(BuyDeckButtonClick);
+            newGamePopupButton.onClick.RemoveListener(NewGameButtonClick);
         }
     }
 }

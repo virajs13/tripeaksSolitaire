@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TriPeaksSolitaire.Game;
 using UnityEngine;
 
 namespace TriPeaksSolitaire.Core
@@ -10,6 +11,8 @@ namespace TriPeaksSolitaire.Core
     public interface IBoardPile : ICardPile
     {
         void LayoutCards(IEnumerable<Card> cardsForBoard);
+
+        Card PossibleMove(Card card);
     }
     public class BoardPile: IBoardPile
     {
@@ -35,13 +38,24 @@ namespace TriPeaksSolitaire.Core
             this.viewPosition = viewPosition;
             this.offset = offset;
         }
-        public async void LayoutCards(IEnumerable<Card> cardsForBoard)
+        public  void LayoutCards(IEnumerable<Card> cardsForBoard)
         {
             Clear();
             SetupCards(cardsForBoard);
             SetupCardPositions();
             MoveCards();
             UpdateCardFacings();
+        }
+
+        public Card PossibleMove(Card card)
+        {
+            foreach (var activeCard in activeCards)
+            {
+                if (GameController.IsValidMove(activeCard, card))
+                    return activeCard;
+            }
+
+            return null;
         }
 
         private void MoveCards()

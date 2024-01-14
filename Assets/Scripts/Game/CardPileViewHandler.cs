@@ -71,14 +71,9 @@ namespace TriPeaksSolitaire.Game
         private bool IsValidBoardPileMove(Card card)
         {
             var wastePileTopCard = ((IWastePile)(wastePileView.CardPile)).TopCard();
-            return card.IsFaceUp && boardPileView.CardPile.Contains(card) && IsValidMove(card,wastePileTopCard);
+            return card.IsFaceUp && boardPileView.CardPile.Contains(card) && GameController.IsValidMove(card,wastePileTopCard);
         }
 
-        public bool IsValidMove(Card cardA, Card cardB)
-        {
-            var difference = Mathf.Abs(cardA.CardInfo.Value - cardB.CardInfo.Value);
-            return difference is 1 or 12;
-        }
 
         private bool IsDrawPileClick(Card card)
         {
@@ -89,6 +84,13 @@ namespace TriPeaksSolitaire.Game
         {
             return boardPileView.CardPile.IsEmpty();
         }
+
+        public bool IsDrawPileClear()
+        {
+            return drawPileView.CardPile.IsEmpty();
+        }
+        
+        
 
         // Returns the card on top of the draw pile
         private Card GetNextDrawCard()

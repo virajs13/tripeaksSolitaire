@@ -1,0 +1,19 @@
+{
+  "playerScores": [
+    {"playerName": "Alice", "score": 30},
+    {"playerName": "Bob", "score": 42},
+    {"playerName": "Charlie", "score": 18},
+    {"playerName": "David", "score": 25},
+    {"playerName": "Eva", "score": 12},
+    {"playerName": "Frank", "score": 48},
+    {"playerName": "Grace", "score": 37},
+    {"playerName": "Hank", "score": 22},
+    {"playerName": "Ivy", "score": 44},
+    {"playerName": "Jack", "score": 9},
+    {"playerName": "Kate", "score": 31},
+    {"playerName": "Liam", "score": 15},
+    {"playerName": "Mia", "score": 40},
+    {"playerName": "Noah", "score": 5},
+    {"playerName": "Olivia", "score": 29}
+  ]
+}

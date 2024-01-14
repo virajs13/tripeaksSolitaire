@@ -4,6 +4,7 @@ using TriPeaksSolitaire.Core;
 using TriPeaksSolitaire.UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Random = System.Random;
 
 namespace TriPeaksSolitaire.Game
 {
@@ -78,12 +79,67 @@ namespace TriPeaksSolitaire.Game
             }
             cardPileViewHandler.HandleCardClick(card);
             uiHandler.UpdateScore(scoreBoard);
+            CheckForGameEndConditions();
+        }
+
+        private void CheckForGameEndConditions()
+        {
+
+            if (IsGameWin())
+            {
+                uiHandler.ShowGameWinPopup();
+                return;
+            }
+
+            if (cardPileViewHandler.IsDrawPileClear())
+            {
+                uiHandler.ShowBuyDeckPopup();
+                return;
+            }
+
+            if (!AnyMovesPossible())
+            {
+                ShowBuyDeckPopupRandom();
+                return;
+            }
+            
+            
+        }
+
+        private void ShowBuyDeckPopupRandom()
+        {
+            // Set the probability of showing the popup 
+            int probability = 5;
+
+            // Generate a random number between 1 and 100
+            Random random = new Random();
+            int randomChance = random.Next(1, 101);
+
+            // Check if the random number falls within the desired probability range
+            if (randomChance <= probability)
+            {
+                uiHandler.ShowBuyDeckPopup();
+            }
+        }
+
+        bool IsGameWin()
+        {
+            return cardPileViewHandler.IsBoardPileClear();
         }
 
 
-       
-        
-        
+        public static bool IsValidMove(Card cardA, Card cardB)
+        {
+            var difference = Mathf.Abs(cardA.CardInfo.Value - cardB.CardInfo.Value);
+            return difference is 1 or 12;
+        }
+        bool AnyMovesPossible()
+        {
+            var wastePileTopCard = ((IWastePile)(wastePileView.CardPile)).TopCard();
+            if (wastePileTopCard == null) return false;
+            return ((IBoardPile)boardPileView.CardPile).PossibleMove(wastePileTopCard) != null;
+        }
+
         void LogError(string message)
         {
             Debug.LogError($"[GAME CONTROLLER]: {message}");

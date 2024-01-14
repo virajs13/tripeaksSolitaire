@@ -15,7 +15,6 @@ namespace TriPeaksSolitaire.Game
         void LayOutCardPiles(IEnumerable<Card> cards);
         void HandleCardClick(Card card);
         void MoveCard(Card card, ICardPileView sourcePile, ICardPileView targetPile);
-
-        bool IsValidMove(Card cardA, Card cardB);
+        
     }
 }
