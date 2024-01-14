@@ -4,12 +4,18 @@ using TriPeaksSolitaire.UI;
 
 namespace TriPeaksSolitaire.Game
 {
-    public interface ICardPileActions
+    public interface ICardMoveActions
     {
-        void MoveCard(Card card, ICardPileView sourcePile, ICardPileView targetPile);
-        void LayOutCardPiles(IEnumerable<Card> cards);
         void PerformValidMove(Card card);
         void DrawCard();
+    }
 
+    public interface ICardPileActions
+    {
+        void LayOutCardPiles(IEnumerable<Card> cards);
+        void HandleCardClick(Card card);
+        void MoveCard(Card card, ICardPileView sourcePile, ICardPileView targetPile);
+
+        bool IsValidMove(Card cardA, Card cardB);
     }
 }

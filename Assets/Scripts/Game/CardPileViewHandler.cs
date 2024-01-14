@@ -6,19 +6,20 @@ using UnityEngine;
 
 namespace TriPeaksSolitaire.Game
 {
-    public class CardPileViewHandler: ICardPileActions
+    public class CardPileViewHandler: ICardPileActions, ICardMoveActions
     {
         private ICardPileView boardPileView;
         private ICardPileView drawPileView;
         private ICardPileView wastePileView;
-        private IGame game;
+        private IScoreBoard scoreBoard;
+       
         
-        public CardPileViewHandler(IGame game,ICardPileView boardPileView, ICardPileView drawPileView, ICardPileView wastePileView)
+        public CardPileViewHandler(ICardPileView boardPileView, ICardPileView drawPileView, ICardPileView wastePileView,IScoreBoard scoreBoard)
         {
-            this.game = game;
             this.boardPileView = boardPileView;
             this.drawPileView = drawPileView;
             this.wastePileView = wastePileView;
+            this.scoreBoard = scoreBoard;
             this.boardPileView.Initialise();
             this.drawPileView.Initialise();
             this.wastePileView.Initialise();
@@ -40,12 +41,15 @@ namespace TriPeaksSolitaire.Game
         {
             //move card from board pile to waste pile
             MoveCard(card,boardPileView,wastePileView);
+            scoreBoard.IncrementMove();
+            
         }
 
         public void DrawCard()
         {
             //move card from draw pile to waste pile
             MoveCard(GetNextDrawCard(),drawPileView,wastePileView);
+            scoreBoard.Reset();
         }
 
         public void HandleCardClick(Card card)
@@ -67,7 +71,13 @@ namespace TriPeaksSolitaire.Game
         private bool IsValidBoardPileMove(Card card)
         {
             var wastePileTopCard = ((IWastePile)(wastePileView.CardPile)).TopCard();
-            return card.IsFaceUp && boardPileView.CardPile.Contains(card) && game.IsValidMove(card,wastePileTopCard);
+            return card.IsFaceUp && boardPileView.CardPile.Contains(card) && IsValidMove(card,wastePileTopCard);
+        }
+
+        public bool IsValidMove(Card cardA, Card cardB)
+        {
+            var difference = Mathf.Abs(cardA.CardInfo.Value - cardB.CardInfo.Value);
+            return difference is 1 or 12;
         }
 
         private bool IsDrawPileClick(Card card)

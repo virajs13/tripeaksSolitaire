@@ -6,5 +6,6 @@ namespace TriPeaksSolitaire.Game
     public interface IGameActions
     {
         void StartNew(IEnumerable<Card> cards);
+        
     }
 }

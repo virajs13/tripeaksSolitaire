@@ -13,8 +13,10 @@ namespace TriPeaksSolitaire.Game
         [SerializeField] private BoardPileView boardPileView;
         [SerializeField] private DrawPileView drawPileView;
         [SerializeField] private WastePileView wastePileView;
+        [SerializeField] private UIHandler uiHandler;
         [SerializeField] private Transform deckHolder;
         private IDeck deck;
+        private Scoreboard scoreBoard;
         
         private CardPileViewHandler cardPileViewHandler;
 
@@ -25,13 +27,20 @@ namespace TriPeaksSolitaire.Game
 
         private void Initialise()
         {
-            SetupDeck();
+            deck = new Deck(cardPrefab,deckHolder);
+            scoreBoard = new Scoreboard();
+            cardPileViewHandler = new CardPileViewHandler(boardPileView,drawPileView,wastePileView,scoreBoard);
             SetupCardPiles();
+            uiHandler.OnNewGameClicked = NewGame;
+            uiHandler.OnBuyDeckButtonClicked = BuyDeck;
+            uiHandler.UpdateScore(scoreBoard);
+
         }
+        
+       
 
         private void SetupCardPiles()
         {
-            cardPileViewHandler = new CardPileViewHandler(this,boardPileView,drawPileView,wastePileView);
             //shuffle deck
             deck.Shuffle();
             //layout all cards in card pile
@@ -48,11 +57,7 @@ namespace TriPeaksSolitaire.Game
                 card.OnSelected = CardClicked;
             }
         }
-
-        private void SetupDeck()
-        {
-            deck = new Deck(cardPrefab,deckHolder);
-        }
+        
 
         public void NewGame()
         {
@@ -72,13 +77,9 @@ namespace TriPeaksSolitaire.Game
                 return;
             }
             cardPileViewHandler.HandleCardClick(card);
+            uiHandler.UpdateScore(scoreBoard);
         }
 
-        public bool IsValidMove(Card cardA, Card cardB)
-        {
-            var difference = Mathf.Abs(cardA.CardInfo.Value - cardB.CardInfo.Value);
-            return difference is 1 or 12;
-        }
 
        
         
