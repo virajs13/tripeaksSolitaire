@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TriPeaksSolitaire.Core;
 using TriPeaksSolitaire.UI;
 using UnityEngine;
@@ -21,6 +22,10 @@ namespace TriPeaksSolitaire.Game
         
         private CardPileViewHandler cardPileViewHandler;
 
+        [SerializeField] private float gameHintIdleTime = 5f;
+        private float lastHintShownTimeStamp = 0;
+        
+
         private void Start()
         {
             Initialise();
@@ -37,8 +42,16 @@ namespace TriPeaksSolitaire.Game
             uiHandler.UpdateScore(scoreBoard);
 
         }
-        
-       
+
+        private void Update()
+        {
+
+            if (Time.time - lastHintShownTimeStamp > gameHintIdleTime)
+            {
+                CheckForGameHints();
+            }
+        }
+
 
         private void SetupCardPiles()
         {
@@ -67,7 +80,13 @@ namespace TriPeaksSolitaire.Game
 
         public void BuyDeck()
         {
-            throw new System.NotImplementedException();
+            deck = new Deck(cardPrefab,deckHolder);
+            //shuffle deck
+            deck.Shuffle();
+            //layout all cards in card pile
+            var allCards = deck.GetCards(BoardPile.NUM_BOARD_CARDS);
+            SubscribeCardClickEvent(allCards);
+            cardPileViewHandler.LayoutDrawPile(allCards);
         }
 
         public void CardClicked(Card card)
@@ -79,7 +98,9 @@ namespace TriPeaksSolitaire.Game
             }
             cardPileViewHandler.HandleCardClick(card);
             uiHandler.UpdateScore(scoreBoard);
+            lastHintShownTimeStamp = Time.time;
             CheckForGameEndConditions();
+           
         }
 
         private void CheckForGameEndConditions()
@@ -96,13 +117,23 @@ namespace TriPeaksSolitaire.Game
                 uiHandler.ShowBuyDeckPopup();
                 return;
             }
+           
+        }
 
-            if (!AnyMovesPossible())
+        private void CheckForGameHints()
+        {
+            lastHintShownTimeStamp = Time.time;
+            if (IsGameWin()) return;
+            if (cardPileViewHandler.IsDrawPileClear()) return;
+            if (AnyMovesPossible())
             {
-                ShowBuyDeckPopupRandom();
-                return;
+                var wastePileTopCard = ((IWastePile)(wastePileView.CardPile)).TopCard();
+                uiHandler.ShowGameHintText($"Tap on {wastePileTopCard.CardInfo.GetHintCardValues()}");
             }
-            
+            else
+            {
+                uiHandler.ShowGameHintText("Draw a card");
+            }
             
         }
 

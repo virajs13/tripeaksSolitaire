@@ -106,7 +106,7 @@ namespace TriPeaksSolitaire.Game
         }
         
         
-        private void LayoutDrawPile(IEnumerable<Card> drawCards)
+        public void LayoutDrawPile(IEnumerable<Card> drawCards)
         {
             drawPileView.LayOutCards(drawCards);
         }

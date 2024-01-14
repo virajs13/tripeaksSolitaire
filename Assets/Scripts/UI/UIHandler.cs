@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using TriPeaksSolitaire.Core;
 using TriPeaksSolitaire.Game;
 using UnityEngine;
@@ -12,6 +14,7 @@ namespace TriPeaksSolitaire.UI
         
         [SerializeField] private Text scoreText;
         [SerializeField] private Text highScoreText;
+        [SerializeField] private Text gameHintText;
 
         [SerializeField] private Button leaderBoardButton;
         [SerializeField] private Button newGameButton;
@@ -37,6 +40,7 @@ namespace TriPeaksSolitaire.UI
         private void BuyDeckButtonClick()
         {
             OnBuyDeckButtonClicked?.Invoke();
+            buyDeckPopup.SetActive(false);
         }
 
         private void LeaderboardButtonClick()
@@ -66,7 +70,19 @@ namespace TriPeaksSolitaire.UI
             gameTimer.StopTimer();
         }
 
-     
+        public void ShowGameHintText(string hintText)
+        {
+            StartCoroutine(AttemptToShowGameHint(hintText));
+        }
+
+        private IEnumerator AttemptToShowGameHint(string hintText)
+        {
+            gameHintText.text = hintText;
+            yield return new WaitForSeconds(4f);
+            gameHintText.text = string.Empty;
+            
+        }
+
 
         private void OnDisable()
         {

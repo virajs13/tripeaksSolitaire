@@ -9,6 +9,7 @@ namespace TriPeaksSolitaire.Core
     {
         void Shuffle();
         IEnumerable<Card> GetAllCards();
+        IEnumerable<Card> GetCards(int num);
     }
 
     public class Deck : IDeck
@@ -57,6 +58,22 @@ namespace TriPeaksSolitaire.Core
             for (int i = 0; i < cards.Length; i++)
             {
                 yield return cards[i];
+            }
+        }
+        
+        public IEnumerable<Card> GetCards(int num)
+        {
+            for (int i = 0; i < cards.Length; i++)
+            {
+                if (i < num)
+                {
+                    yield return cards[i];
+                }
+                else
+                {
+                    cardPool.ReturnObject(cards[i]);
+                }
+                
             }
         }
         

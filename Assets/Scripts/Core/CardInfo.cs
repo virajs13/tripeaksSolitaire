@@ -64,6 +64,14 @@ namespace TriPeaksSolitaire.Core
             var suit = (Suit)Random.Range(1, 5);
             return new CardInfo(value, suit);
         }
+
+        public string GetHintCardValues()
+        {
+            var valueAbove = value == Value.King ? Value.Ace : (Value)((int)value + 1);
+            var valueBelow = value == Value.Ace ? Value.King : (Value)((int)value - 1);
+
+            return $"{valueAbove} Or {valueBelow}";
+        }
         
         public override string ToString()
         {
