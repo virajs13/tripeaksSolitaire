@@ -58,6 +58,10 @@ namespace TriPeaksSolitaire.Game
             {
                 DrawCard();
             }
+            else
+            {
+                card.Shake();
+            }
         }
 
         private bool IsValidBoardPileMove(Card card)

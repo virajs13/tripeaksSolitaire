@@ -117,6 +117,11 @@ namespace TriPeaksSolitaire.Core
         {
             rectTransform.position = targetPosition;
         }
+
+        public void Shake()
+        {
+            content.transform.DOShakePosition(1f,Vector3.right*5f,fadeOut:true);
+        }
         //Assigned to UI event
         public void OnCardClick()
         {
