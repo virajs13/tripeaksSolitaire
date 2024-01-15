@@ -7,13 +7,15 @@ namespace TriPeaksSolitaire.UI
 {
     public class WastePileView: MonoBehaviour, ICardPileView
     {
-        private Vector2 pilePosition;
+       
         private IWastePile wastePile;
         public ICardPile CardPile => wastePile;
+        private RectTransform rectTransform;
 
         private void Awake()
         {
-            pilePosition = GetComponent<RectTransform>().position;
+            rectTransform = GetComponent<RectTransform>();
+
         }
 
         public void Initialise()
@@ -28,7 +30,7 @@ namespace TriPeaksSolitaire.UI
             if (topCard)
             {
                 topCard.transform.SetAsLastSibling();
-                topCard.MoveTo(pilePosition);
+                topCard.MoveTo(GetPosition());
             }
         }
         
@@ -39,7 +41,7 @@ namespace TriPeaksSolitaire.UI
 
         public Vector2 GetPosition()
         {
-            return pilePosition;
+            return rectTransform.position;
         }
     }
 }
