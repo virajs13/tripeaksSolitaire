@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TriPeaksSolitaire.Core;
@@ -24,8 +25,8 @@ namespace TriPeaksSolitaire.Game
 
         [SerializeField] private float gameHintIdleTime = 5f;
         private float lastHintShownTimeStamp = 0;
-        
 
+        private Card currentClickedCard;
         private void Start()
         {
             Initialise();
@@ -96,26 +97,29 @@ namespace TriPeaksSolitaire.Game
                 LogError("card is null");
                 return;
             }
+
+            currentClickedCard = card;
             cardPileViewHandler.HandleCardClick(card);
             uiHandler.UpdateScore(scoreBoard);
             lastHintShownTimeStamp = Time.time;
-            CheckForGameEndConditions();
+           StartCoroutine(CheckForGameEndConditions());
            
         }
 
-        private void CheckForGameEndConditions()
+        private IEnumerator CheckForGameEndConditions()
         {
-
+            if (currentClickedCard)
+                yield return currentClickedCard.WaitForCardMoveTween();
             if (IsGameWin())
             {
                 uiHandler.ShowGameWinPopup();
-                return;
+                yield break;
             }
 
             if (cardPileViewHandler.IsDrawPileClear())
             {
                 uiHandler.ShowBuyDeckPopup();
-                return;
+                yield break;
             }
            
         }

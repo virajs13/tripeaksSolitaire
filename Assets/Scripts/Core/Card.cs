@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
@@ -39,6 +40,8 @@ namespace TriPeaksSolitaire.Core
         public Action<Card> OnSelected;
 
         private RectTransform rectTransform;
+
+        private Tween cardMoveTween;
 
         private void Awake()
         {
@@ -110,7 +113,13 @@ namespace TriPeaksSolitaire.Core
 
         public void MoveTo(Vector2 targetPosition)
         {
-            rectTransform.DOMove(targetPosition, moveDuration);
+            cardMoveTween = rectTransform.DOMove(targetPosition, moveDuration);
+        }
+
+        public IEnumerator WaitForCardMoveTween()
+        {
+            if (cardMoveTween!=null)
+                yield return cardMoveTween.WaitForCompletion();
         }
 
         public void MoveInstant(Vector2 targetPosition)

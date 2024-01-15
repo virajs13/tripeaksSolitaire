@@ -1,10 +1,7 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using TriPeaksSolitaire.Core;
 using TriPeaksSolitaire.Game;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace TriPeaksSolitaire.UI
